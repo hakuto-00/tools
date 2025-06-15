@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>テキストピクセルアート - Slackにも使える！</title>
+    <meta name="description" content="入力したテキストを8×8ピクセルのレトロなピクセルアートに変換。カラーカスタマイズ対応で、オリジナル作品をダウンロード可能。">
+    <meta property="og:title" content="テキストピクセルアート - 文字をレトロなピクセルアートに変換" />
+    <meta property="og:description" content="入力したテキストを8×8ピクセルのレトロなピクセルアートに変換。カラーカスタマイズ対応で、オリジナル作品をダウンロード可能。SlackやInstagramでシェアしよう！" />
+    <meta property="og:image" content="https://pa-tu.work/tools/text-pixel-art/ogp.png" />
+    <meta property="og:url" content="https://pa-tu.work/tools/text-pixel-art/" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@hakuto00" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="https://pa-tu.work/img/favicon.ico" />
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-TWMGPFV');</script>
+    <!-- End Google Tag Manager -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&family=M+PLUS+1p:wght@400;700&family=M+PLUS+2:wght@400;700&family=M+PLUS+Code+Latin:wght@400;700&family=Kosugi:wght@400&family=Kosugi+Maru&family=Sawarabi+Gothic&family=Sawarabi+Mincho&family=Dela+Gothic+One&family=Kaisei+Decol:wght@400;700&family=Kaisei+Opti:wght@400;700&family=Kaisei+HarunoUmi:wght@400;700&family=Kaisei+Tokumin:wght@400;700&family=Kiwi+Maru:wght@300;400;500&family=Hachi+Maru+Pop&family=Rampart+One&family=Mochiy+Pop+P+One&family=Mochiy+Pop+One&family=Train+One&family=Reggae+One&family=Rocknroll+One&family=Stick&family=Stick+No+Bills:wght@400;700&family=New+Tegomin&family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;700&family=Zen+Antique&family=Zen+Antique+Soft&family=Zen+Old+Mincho:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&family=Zen+Kaku+Gothic+Antique:wght@400;700&family=Zen+Kurenaido&family=Yomogi&family=Murecho:wght@400;700&family=BIZ+UDPGothic:wght@400;700&family=BIZ+UDPMincho:wght@400;700&family=BIZ+UDGothic:wght@400;700&family=BIZ+UDMincho:wght@400;700&family=Klee+One:wght@400;600&family=Shippori+Mincho:wght@400;700&family=Shippori+Mincho+B1:wght@400;700&family=Shippori+Antique&family=Shippori+Antique+B1&family=DotGothic16&family=Palette+Mosaic&family=Yuji+Syuku&family=Yuji+Boku&family=Yuji+Mai&family=Yuji+Hentaigana+Akari&family=Yuji+Hentaigana+Akebono&family=WDXL+Lubrifont+JP+N:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TWMGPFV"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container">
+        <header>
+            <h1>📝 テキストピクセルアート</h1>
+        </header>
+
+        <main>
+            <!-- 左側: キャンバス表示エリア -->
+            <div class="canvas-section">
+                <div class="canvas-container">
+                    <canvas id="pixel-canvas"></canvas>
+                </div>
+                
+                <div class="download-section">
+                    <button id="download-btn" disabled>🎨 ピクセルアートをダウンロード</button>
+                    <p class="info-text">PNG形式でダウンロードできます</p>
+                </div>
+            </div>
+
+            <!-- 右側: 設定エリア -->
+            <div class="settings-section">
+                <div class="text-input-group">
+                    <label for="text-input">変換したいテキスト:</label>
+                    <textarea id="text-input" placeholder="テキストを入力してください" rows="2" maxlength="100" autocomplete="off"></textarea>
+                    <!-- レスポンシブ時のみ表示される生成ボタン -->
+                    <button id="generate-btn" class="mobile-only">ピクセルアート生成</button>
+                </div>
+
+                <div class="settings-panel">
+                    <h3>🎨 カスタマイズ設定</h3>
+                    <div class="color-controls">
+                        <div class="color-picker-group">
+                            <label for="text-color">
+                                文字色:
+                                <label class="gradient-checkbox">
+                                    <input type="checkbox" id="use-gradient">
+                                    <span class="checkmark">🎨 グラデーション</span>
+                                </label>
+                            </label>
+                            <input type="color" id="text-color" value="#000000" class="single-color-picker">
+                        </div>
+                        
+                        <!-- グラデーション設定パネル（初期状態は非表示） -->
+                        <div class="gradient-controls" id="gradient-panel">
+                            <label class="gradient-label">グラデーションを選択:</label>
+                            
+                            <!-- タブナビゲーションと角度選択のコンテナ -->
+                            <div class="gradient-header">
+                                <!-- タブナビゲーション -->
+                                <div class="gradient-tabs">
+                                    <button class="tab-button active" data-tab="basic">基本色</button>
+                                    <button class="tab-button" data-tab="colorful">カラフル</button>
+                                </div>
+                                
+                                <!-- 角度選択（右寄せ） -->
+                                <div class="gradient-angle-control">
+                                    <label for="gradient-angle">角度:</label>
+                                    <select id="gradient-angle">
+                                        <option value="0">0° →</option>
+                                        <option value="45" selected>45° ↗</option>
+                                        <option value="90">90° ↑</option>
+                                        <option value="135">135° ↖</option>
+                                        <option value="180">180° ←</option>
+                                        <option value="225">225° ↙</option>
+                                        <option value="270">270° ↓</option>
+                                        <option value="315">315° ↘</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 基本色グラデーション -->
+                            <div class="gradient-tab-content active" id="basic-gradients">
+                                <div class="gradient-presets">
+                                    <div class="gradient-option" data-gradient="red" title="レッド">
+                                        <div class="gradient-preview gradient-red"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="orange-red" title="オレンジレッド">
+                                        <div class="gradient-preview gradient-orange-red"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="orange" title="オレンジ">
+                                        <div class="gradient-preview gradient-orange"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="amber" title="アンバー">
+                                        <div class="gradient-preview gradient-amber"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="yellow" title="イエロー">
+                                        <div class="gradient-preview gradient-yellow"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="lime" title="ライム">
+                                        <div class="gradient-preview gradient-lime"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="green" title="グリーン">
+                                        <div class="gradient-preview gradient-green"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="emerald" title="エメラルド">
+                                        <div class="gradient-preview gradient-emerald"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="teal" title="ティール">
+                                        <div class="gradient-preview gradient-teal"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="cyan" title="シアン">
+                                        <div class="gradient-preview gradient-cyan"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="sky" title="スカイ">
+                                        <div class="gradient-preview gradient-sky"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="blue" title="ブルー">
+                                        <div class="gradient-preview gradient-blue"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="indigo" title="インディゴ">
+                                        <div class="gradient-preview gradient-indigo"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="violet" title="バイオレット">
+                                        <div class="gradient-preview gradient-violet"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="purple" title="パープル">
+                                        <div class="gradient-preview gradient-purple"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="fuchsia" title="フューシャ">
+                                        <div class="gradient-preview gradient-fuchsia"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="magenta" title="マゼンタ">
+                                        <div class="gradient-preview gradient-magenta"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="pink" title="ピンク">
+                                        <div class="gradient-preview gradient-pink"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="rose" title="ローズ">
+                                        <div class="gradient-preview gradient-rose"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="crimson" title="クリムゾン">
+                                        <div class="gradient-preview gradient-crimson"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- カラフルグラデーション -->
+                            <div class="gradient-tab-content" id="colorful-gradients">
+                                <div class="gradient-presets">
+                                    <div class="gradient-option" data-gradient="cyber" title="サイバー">
+                                        <div class="gradient-preview gradient-cyber"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="rainbow" title="レインボー">
+                                        <div class="gradient-preview gradient-rainbow"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="galaxy" title="ギャラクシー">
+                                        <div class="gradient-preview gradient-galaxy"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="autumn" title="オータム">
+                                        <div class="gradient-preview gradient-autumn"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="cosmic" title="コズミック">
+                                        <div class="gradient-preview gradient-cosmic"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="dream" title="ドリーム">
+                                        <div class="gradient-preview gradient-dream"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="soft" title="ソフト">
+                                        <div class="gradient-preview gradient-soft"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="deep" title="ディープ">
+                                        <div class="gradient-preview gradient-deep"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="aqua" title="アクア">
+                                        <div class="gradient-preview gradient-aqua"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="passion" title="パッション">
+                                        <div class="gradient-preview gradient-passion"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="spring" title="スプリング">
+                                        <div class="gradient-preview gradient-spring"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="sky-peach" title="スカイピーチ">
+                                        <div class="gradient-preview gradient-sky-peach"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="prism" title="プリズム">
+                                        <div class="gradient-preview gradient-prism"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="sunset" title="サンセット">
+                                        <div class="gradient-preview gradient-sunset"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="bubble" title="バブル">
+                                        <div class="gradient-preview gradient-bubble"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="ocean-deep" title="オーシャンディープ">
+                                        <div class="gradient-preview gradient-ocean-deep"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="sunset-dream" title="サンセットドリーム">
+                                        <div class="gradient-preview gradient-sunset-dream"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="fairy-tale" title="フェアリーテール">
+                                        <div class="gradient-preview gradient-fairy-tale"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="neon-wave" title="ネオンウェーブ">
+                                        <div class="gradient-preview gradient-neon-wave"></div>
+                                    </div>
+                                    <div class="gradient-option" data-gradient="golden-peach" title="ゴールデンピーチ">
+                                        <div class="gradient-preview gradient-golden-peach"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="color-picker-group">
+                            <label for="bg-color">背景色:</label>
+                            <input type="color" id="bg-color" value="#ffffff">
+                        </div>
+                    </div>
+                    
+                    <div class="size-controls">
+                        <div class="control-group">
+                            <label for="font-family">フォント:</label>
+                            <select id="font-family">
+                                <option value="Noto Sans JP" selected>Noto Sans JP</option>
+                                <option value="Noto Serif JP">Noto Serif JP</option>
+                                <option value="M PLUS Rounded 1c">M PLUS Rounded 1c</option>
+                                <option value="M PLUS 1p">M PLUS 1p</option>
+                                <option value="M PLUS 2">M PLUS 2</option>
+                                <option value="M PLUS Code Latin">M PLUS Code Latin</option>
+                                <option value="Kosugi">Kosugi</option>
+                                <option value="Kosugi Maru">Kosugi Maru</option>
+                                <option value="Sawarabi Gothic">Sawarabi Gothic</option>
+                                <option value="Sawarabi Mincho">Sawarabi Mincho</option>
+                                <option value="Dela Gothic One">Dela Gothic One</option>
+                                <option value="Kaisei Decol">Kaisei Decol</option>
+                                <option value="Kaisei Opti">Kaisei Opti</option>
+                                <option value="Kaisei HarunoUmi">Kaisei HarunoUmi</option>
+                                <option value="Kaisei Tokumin">Kaisei Tokumin</option>
+                                <option value="Kiwi Maru">Kiwi Maru</option>
+                                <option value="Hachi Maru Pop">Hachi Maru Pop</option>
+                                <option value="Rampart One">Rampart One</option>
+                                <option value="Mochiy Pop P One">Mochiy Pop P One</option>
+                                <option value="Mochiy Pop One">Mochiy Pop One</option>
+                                <option value="Train One">Train One</option>
+                                <option value="Reggae One">Reggae One</option>
+                                <option value="Rocknroll One">Rocknroll One</option>
+                                <option value="Stick">Stick</option>
+                                <option value="Stick No Bills">Stick No Bills</option>
+                                <option value="New Tegomin">New Tegomin</option>
+                                <option value="Yusei Magic">Yusei Magic</option>
+                                <option value="Zen Maru Gothic">Zen Maru Gothic</option>
+                                <option value="Zen Antique">Zen Antique</option>
+                                <option value="Zen Antique Soft">Zen Antique Soft</option>
+                                <option value="Zen Old Mincho">Zen Old Mincho</option>
+                                <option value="Zen Kaku Gothic New">Zen Kaku Gothic New</option>
+                                <option value="Zen Kaku Gothic Antique">Zen Kaku Gothic Antique</option>
+                                <option value="Zen Kurenaido">Zen Kurenaido</option>
+                                <option value="Yomogi">Yomogi</option>
+                                <option value="Murecho">Murecho</option>
+                                <option value="BIZ UDPGothic">BIZ UDPGothic</option>
+                                <option value="BIZ UDPMincho">BIZ UDPMincho</option>
+                                <option value="BIZ UDGothic">BIZ UDGothic</option>
+                                <option value="BIZ UDMincho">BIZ UDMincho</option>
+                                <option value="Klee One">Klee One</option>
+                                <option value="Shippori Mincho">Shippori Mincho</option>
+                                <option value="Shippori Mincho B1">Shippori Mincho B1</option>
+                                <option value="Shippori Antique">Shippori Antique</option>
+                                <option value="Shippori Antique B1">Shippori Antique B1</option>
+                                <option value="DotGothic16">DotGothic16</option>
+                                <option value="Palette Mosaic">Palette Mosaic</option>
+                                <option value="Yuji Syuku">Yuji Syuku</option>
+                                <option value="Yuji Boku">Yuji Boku</option>
+                                <option value="Yuji Mai">Yuji Mai</option>
+                                <option value="Yuji Hentaigana Akari">Yuji Hentaigana Akari</option>
+                                <option value="Yuji Hentaigana Akebono">Yuji Hentaigana Akebono</option>
+                                <option value="WDXL Lubrifont JP N">WDXL Lubrifont JP N</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="font-style">フォントスタイル:</label>
+                            <select id="font-style">
+                                <option value="bold">太字</option>
+                                <option value="normal" selected>標準</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>テキスト配置:</label>
+                            <div class="text-align-buttons">
+                                <button type="button" class="align-btn" data-align="left" title="左寄せ">
+                                    <span class="align-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M288 64c0 17.7-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32L32 352c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/></svg></span>
+                                </button>
+                                <button type="button" class="align-btn active" data-align="center" title="中央寄せ">
+                                    <span class="align-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M352 64c0-17.7-14.3-32-32-32L128 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32zm96 128c0-17.7-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 448c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32zM352 320c0-17.7-14.3-32-32-32l-192 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32z"/></svg></span>
+                                </button>
+                                <button type="button" class="align-btn" data-align="right" title="右寄せ">
+                                    <span class="align-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M288 64c0 17.7-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32L32 352c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/></svg></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="pixel-size">グリッドサイズ:</label>
+                            <div>(1-300まで指定可能)</div>
+                            <input type="number" id="pixel-size" min="1" max="300" value="50" step="1">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="show-grid">グリッド線:</label>
+                        <div class="toggle">
+                            <input type="checkbox" id="show-grid" checked>
+                        </div>
+                    </div>
+                    <div class="performance-tip">
+                        💡 <strong>パフォーマンスのヒント:</strong><br>
+                        グリッドサイズが大きいほど詳細なピクセルアートが作成できますが、メモリ使用量も増加します。<br>
+                        300以上のサイズを使用する場合は処理に時間がかかる場合があります。
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 概要・機能セクション -->
+        <div class="content-footer">
+            <div class="description">
+                <h3>✨ テキストをピクセルアートに変換</h3>
+                <p>テキストを入力すると指定したフォントイメージでピクセルアートに変換するツールです。レトロゲーム風のドットテキストを簡単に作成し、PNGファイルとしてダウンロードできます。</p>
+                <div class="features">
+                    <div class="feature">🎨 カラーカスタマイズ対応</div>
+                    <div class="feature">📱 Google日本語フォント対応</div>
+                    <div class="feature">🖼️ 高解像度PNG出力</div>
+                </div>
+            </div>
+        </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="social-section">
+            <div class="social-buttons">
+                <a href="https://twitter.com/intent/tweet?text=テキストピクセルアート%0Ahttps://pa-tu.work/tools/text-pixel-art" target="_blank" class="social-btn twitter">
+                    <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/></svg></span>
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://pa-tu.work/tools/text-pixel-art" target="_blank" class="social-btn facebook">
+                    <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/></svg></span>
+                </a>
+                <a href="https://line.me/R/msg/text/?テキストピクセルアート%0Ahttps://pa-tu.work/tools/text-pixel-art" target="_blank" class="social-btn line">
+                    <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M311 196.8v81.3c0 2.1-1.6 3.7-3.7 3.7h-13c-1.3 0-2.4-.7-3-1.5l-37.3-50.3v48.2c0 2.1-1.6 3.7-3.7 3.7h-13c-2.1 0-3.7-1.6-3.7-3.7V196.9c0-2.1 1.6-3.7 3.7-3.7h12.9c1.1 0 2.4 .6 3 1.6l37.3 50.3V196.9c0-2.1 1.6-3.7 3.7-3.7h13c2.1-.1 3.8 1.6 3.8 3.5zm-93.7-3.7h-13c-2.1 0-3.7 1.6-3.7 3.7v81.3c0 2.1 1.6 3.7 3.7 3.7h13c2.1 0 3.7-1.6 3.7-3.7V196.8c0-1.9-1.6-3.7-3.7-3.7zm-31.4 68.1H150.3V196.8c0-2.1-1.6-3.7-3.7-3.7h-13c-2.1 0-3.7 1.6-3.7 3.7v81.3c0 1 .3 1.8 1 2.5c.7 .6 1.5 1 2.5 1h52.2c2.1 0 3.7-1.6 3.7-3.7v-13c0-1.9-1.6-3.7-3.5-3.7zm193.7-68.1H327.3c-1.9 0-3.7 1.6-3.7 3.7v81.3c0 1.9 1.6 3.7 3.7 3.7h52.2c2.1 0 3.7-1.6 3.7-3.7V265c0-2.1-1.6-3.7-3.7-3.7H344V247.7h35.5c2.1 0 3.7-1.6 3.7-3.7V230.9c0-2.1-1.6-3.7-3.7-3.7H344V213.5h35.5c2.1 0 3.7-1.6 3.7-3.7v-13c-.1-1.9-1.7-3.7-3.7-3.7zM512 93.4V419.4c-.1 51.2-42.1 92.7-93.4 92.6H92.6C41.4 511.9-.1 469.8 0 418.6V92.6C.1 41.4 42.2-.1 93.4 0H419.4c51.2 .1 92.7 42.1 92.6 93.4zM441.6 233.5c0-83.4-83.7-151.3-186.4-151.3s-186.4 67.9-186.4 151.3c0 74.7 66.3 137.4 155.9 149.3c21.8 4.7 19.3 12.7 14.4 42.1c-.8 4.7-3.8 18.4 16.1 10.1s107.3-63.2 146.5-108.2c27-29.7 39.9-59.8 39.9-93.1z"/></svg></span>
+                </a>
+            </div>
+            <div class="social-header">
+                <a href="https://pa-tu.work/" target="_blank" class="brand-link">
+                    <img src="https://pa-tu.work/img/icon.png" alt="PA-TU" class="brand-icon">
+                </a>
+            </div>
+        </div>
+        <div class="copyright-section">
+            © 2025 Copyright 
+            <a class="copyright-link" href="https://pa-tu.work/">Pa-Tu</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
