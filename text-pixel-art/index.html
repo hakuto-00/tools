@@ -233,8 +233,14 @@
                             </div>
                         </div>
                         <div class="color-picker-group">
-                            <label for="bg-color">背景色:</label>
-                            <input type="color" id="bg-color" value="#ffffff">
+                            <label for="bg-color">
+                                背景色:
+                                <label class="gradient-checkbox transparent-checkbox">
+                                    <input type="checkbox" id="transparent-bg">
+                                    <span class="checkmark">🔍 透過</span>
+                                </label>
+                            </label>
+                            <input type="color" id="bg-color" value="#ffffff" class="single-bg-picker">
                         </div>
                     </div>
                     
@@ -342,7 +348,7 @@
                 <div class="features">
                     <div class="feature">🎨 カラーカスタマイズ対応</div>
                     <div class="feature">📱 Google日本語フォント対応</div>
-                    <div class="feature">🖼️ 高解像度PNG出力</div>
+                    <div class="feature">🔍 透過背景対応</div>
                 </div>
             </div>
         </div>
