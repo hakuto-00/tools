@@ -1,6 +1,6 @@
 入力したテキストをレトロなピクセルアートに変換するWebアプリをHTMLで作成しました。Google Fonts対応で50種類以上の日本語フォントから選択でき、複数行テキストにも対応した高機能なピクセルアート生成ツールです。
 
-[![テキストピクセルアートのスクリーンショット](/storage/img/posts/ogp.jpg)](https://pa-tu.work/tools/text-pixel-art)
+[![テキストピクセルアートのスクリーンショット](/tools/text-pixel-art/ogp.png)](https://pa-tu.work/tools/text-pixel-art)
 
 [テキストピクセルアート](https://pa-tu.work/tools/text-pixel-art)
 
