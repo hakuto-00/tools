@@ -95,6 +95,9 @@ class TextPixelArt {
         this.shouldDisplayResult = true;
         this.pendingImageData = null;
         
+        // 透過背景フラグ
+        this.useTransparentBg = false;
+        
         this.initEventListeners();
         this.initResponsiveCanvas();
     }
@@ -147,6 +150,8 @@ class TextPixelArt {
         const gradientAngleSelect = document.getElementById('gradient-angle');
         const gradientOptions = document.querySelectorAll('.gradient-option');
         const singleColorPicker = document.getElementById('text-color');
+        const transparentBgCheckbox = document.getElementById('transparent-bg');
+        const singleBgPicker = document.getElementById('bg-color');
         
         // タブ機能の初期化（最初に実行）
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -185,6 +190,42 @@ class TextPixelArt {
                 // 単色カラーピッカーの表示制御
                 if (singleColorPicker) {
                     singleColorPicker.classList.toggle('hidden', this.useGradient);
+                }
+                
+                // テキストが入力されている場合は再生成
+                if (textInput && textInput.value.trim()) {
+                    this.generatePixelArt();
+                }
+            });
+        }
+        
+        // 透過背景チェックボックスのイベント
+        if (transparentBgCheckbox) {
+            transparentBgCheckbox.addEventListener('change', (e) => {
+                this.useTransparentBg = e.target.checked;
+                
+                // キャンバスのクラスを切り替えて背景表示を変更
+                if (this.useTransparentBg) {
+                    this.canvas.classList.add('transparent');
+                    // 透過背景時はグリッド線を非表示にする
+                    const showGridBtn = document.getElementById('show-grid');
+                    const toggleElement = showGridBtn.parentElement;
+                    showGridBtn.checked = false;
+                    toggleElement.classList.remove('checked');
+                    this.showGrid = false;
+                } else {
+                    this.canvas.classList.remove('transparent');
+                    // 通常背景時はグリッド線を表示に戻す
+                    const showGridBtn = document.getElementById('show-grid');
+                    const toggleElement = showGridBtn.parentElement;
+                    showGridBtn.checked = true;
+                    toggleElement.classList.add('checked');
+                    this.showGrid = true;
+                }
+                
+                // 背景色ピッカーの表示制御
+                if (singleBgPicker) {
+                    singleBgPicker.classList.toggle('hidden', this.useTransparentBg);
                 }
                 
                 // テキストが入力されている場合は再生成
@@ -439,10 +480,22 @@ class TextPixelArt {
         this.tempCanvases.push(tempCanvas);
         
         // フォント設定（漢字対応のためより大きく）
-        const fontSize = Math.max(64, this.pixelSize * 8);
+        // 文字数に応じてキャンバスサイズとフォントサイズを調整
+        const allLines = text.split('\n').filter(line => line.trim().length > 0);
+        const maxLineLength = Math.max(...allLines.map(line => line.trim().length));
+        const baseCharCount = 6; // 基準文字数
+        let canvasSizeMultiplier = 1;
+        
+        // 文字数が少ない場合はキャンバスサイズを大きくして、相対的に文字を大きく見せる
+        if (maxLineLength <= baseCharCount) {
+            canvasSizeMultiplier = Math.min(5, Math.max(2, (baseCharCount * 1.5) / Math.max(1, maxLineLength)));
+        }
+        
+        // ベースフォントサイズ（キャンバスサイズマルチプライヤーに応じて調整）
+        const baseFontSize = Math.max(64, this.pixelSize * 4);
+        const fontSize = Math.floor(baseFontSize * canvasSizeMultiplier);
         const fontWeight = this.fontStyle;
         const fontString = `${fontWeight} ${fontSize}px "${this.fontFamily}", sans-serif`;
-        
         tempCtx.font = fontString;
         tempCtx.textAlign = 'left'; // 幅測定時も左寄せに統一
         tempCtx.textBaseline = 'middle';
@@ -470,10 +523,26 @@ class TextPixelArt {
         const lineHeight = fontSize * 1.2; // 行間を考慮
         const totalHeight = lines.length * lineHeight;
         
-        // 一時キャンバスのサイズ設定（上下左右の余白を均等に）
+        // 一時キャンバスのサイズ設定
         const padding = Math.floor(fontSize * 0.3);
-        tempCanvas.width = maxWidth + padding * 2;
-        tempCanvas.height = totalHeight + padding * 2;
+        const baseWidth = maxWidth + padding * 2;
+        const baseHeight = totalHeight + padding * 2;
+        
+        // 短いテキストの場合、キャンバスサイズを小さくして文字の密度を上げる
+        let adjustedWidth = baseWidth;
+        let adjustedHeight = baseHeight;
+        
+        if (maxLineLength <= 6) {
+            // 短いテキストの場合、余白を大幅に削減
+            const densityMultiplier = Math.max(0.2, maxLineLength / 8);
+            const minPadding = Math.floor(fontSize * 0.05);
+            
+            adjustedWidth = maxWidth + minPadding * 2;
+            adjustedHeight = totalHeight + minPadding * 2;
+        }
+        
+        tempCanvas.width = adjustedWidth;
+        tempCanvas.height = adjustedHeight;
         
         // 背景を白で塗りつぶし
         tempCtx.fillStyle = '#FFFFFF';
@@ -487,23 +556,27 @@ class TextPixelArt {
         
         // 各行を描画（配置に応じてX座標を調整）
         tempCtx.fillStyle = '#000000';
+        
+        // 短いテキスト用のパディング調整
+        const actualPadding = maxLineLength <= 6 ? Math.floor(fontSize * 0.05) : padding;
+        
         lines.forEach((line, index) => {
             const lineWidth = lineMetrics[index].width;
-            const y = padding + (index + 0.5) * lineHeight;
+            const y = actualPadding + (index + 0.5) * lineHeight;
             
             let x;
             switch (this.textAlign) {
                 case 'left':
-                    x = padding;
+                    x = actualPadding;
                     break;
                 case 'center':
-                    x = padding + (maxWidth - lineWidth) / 2;
+                    x = actualPadding + (maxWidth - lineWidth) / 2;
                     break;
                 case 'right':
-                    x = padding + maxWidth - lineWidth;
+                    x = actualPadding + maxWidth - lineWidth;
                     break;
                 default:
-                    x = padding + (maxWidth - lineWidth) / 2; // デフォルトは中央寄せ
+                    x = actualPadding + (maxWidth - lineWidth) / 2; // デフォルトは中央寄せ
             }
             
             tempCtx.fillText(line, x, y);
@@ -531,7 +604,7 @@ class TextPixelArt {
         // キャンバスサイズを600x600に固定
         const canvasSize = 600;
         
-        // グリッドサイズ = マス目の数
+        // グリッドサイズ = マス目の数（ユーザー設定値を使用）
         const gridSize = this.pixelSize;
         
         // 安全性チェック：グリッドサイズが0以下の場合は処理を中止
@@ -622,9 +695,20 @@ class TextPixelArt {
         this.ctx.mozImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
         
-        // 背景塗りつぶし
-        this.ctx.fillStyle = this.bgColor;
-        this.ctx.fillRect(0, 0, canvasSize, canvasSize);
+        // ピクセルパーフェクトな描画のための設定
+        this.ctx.translate(0.5, 0.5);  // 0.5ピクセルのオフセットでクリアな線を描画
+        this.ctx.translate(-0.5, -0.5); // すぐに元に戻す（設定のリセット効果）
+        
+        // 背景処理（透過背景でない場合のみ塗りつぶし）
+        if (!this.useTransparentBg) {
+            this.ctx.fillStyle = this.bgColor;
+            this.ctx.fillRect(0, 0, canvasSize, canvasSize);
+            this.canvas.classList.remove('transparent');
+        } else {
+            // 透過背景の場合はキャンバスをクリアしてチェッカーボード表示
+            this.ctx.clearRect(0, 0, canvasSize, canvasSize);
+            this.canvas.classList.add('transparent');
+        }
         
         // グラデーションが有効な場合は全体用のグラデーションを作成
         if (this.useGradient) {
@@ -635,13 +719,15 @@ class TextPixelArt {
         
         // ピクセルデータを描画
         pixelData.forEach(({ px, py }) => {
-            const drawX = px * cellSize;
-            const drawY = py * cellSize;
-            this.ctx.fillRect(drawX, drawY, cellSize, cellSize);
+            const drawX = Math.floor(px * cellSize);
+            const drawY = Math.floor(py * cellSize);
+            const drawWidth = Math.ceil(cellSize);
+            const drawHeight = Math.ceil(cellSize);
+            this.ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
         });
         
-        // グリッド線を描画（設定に応じて）
-        if (this.showGrid) {
+        // グリッド線を描画（グリッド表示が有効で、透過背景でない場合のみ）
+        if (this.showGrid && !this.useTransparentBg) {
             this.drawGrid(gridSize, cellSize);
         }
     }
@@ -783,8 +869,15 @@ class TextPixelArt {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `pixel-art-${timestamp}.png`;
         
+        let canvasToDownload = this.canvas;
+        
+        // 透過背景の場合は専用処理
+        if (this.useTransparentBg) {
+            canvasToDownload = this.createTransparentCanvas();
+        }
+        
         // ダウンロード実行
-        this.canvas.toBlob((blob) => {
+        canvasToDownload.toBlob((blob) => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -793,7 +886,7 @@ class TextPixelArt {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        });
+        }, 'image/png');
     }
     
     /**
@@ -827,16 +920,22 @@ class TextPixelArt {
         // キャンバス全体をクリア
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // 背景色で塗りつぶし
-        this.ctx.fillStyle = this.bgColor;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // 透過背景でない場合のみ背景色で塗りつぶし
+        if (!this.useTransparentBg) {
+            this.ctx.fillStyle = this.bgColor;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.canvas.classList.remove('transparent');
+        } else {
+            // 透過背景の場合はチェッカーボード表示
+            this.canvas.classList.add('transparent');
+        }
         
-        // グリッドのみ表示（設定に応じて）
+        // グリッドのみ表示（設定に応じて、かつ透過背景でない場合のみ）
         const canvasSize = 600;
         const gridSize = this.pixelSize;
         const cellSize = canvasSize / gridSize;
         
-        if (this.showGrid) {
+        if (this.showGrid && !this.useTransparentBg) {
             // グリッド線を描画（白い背景部分用のグリッド線）
             this.ctx.strokeStyle = '#d0d0d0';
             this.ctx.lineWidth = 0.3;
@@ -910,6 +1009,80 @@ class TextPixelArt {
                 }
             });
         });
+    }
+    
+    /**
+     * 透過背景用のキャンバスを作成
+     * @returns {HTMLCanvasElement} 透過背景のキャンバス
+     */
+    createTransparentCanvas() {
+        const downloadCanvas = document.createElement('canvas');
+        const downloadCtx = downloadCanvas.getContext('2d');
+        
+        downloadCanvas.width = 600;
+        downloadCanvas.height = 600;
+        
+        // 高品質設定
+        downloadCtx.imageSmoothingEnabled = false;
+        downloadCtx.webkitImageSmoothingEnabled = false;
+        downloadCtx.mozImageSmoothingEnabled = false;
+        downloadCtx.msImageSmoothingEnabled = false;
+        
+        // 現在のキャンバスから画像データを取得
+        const imageData = this.ctx.getImageData(0, 0, 600, 600);
+        const data = imageData.data;
+        
+        // 新しい画像データを作成（すべて透明で初期化）
+        const newImageData = downloadCtx.createImageData(600, 600);
+        const newData = newImageData.data;
+        
+        // 背景色が設定されていない場合のデフォルト値
+        let bgR = 255, bgG = 255, bgB = 255;
+        
+        if (this.bgColor && this.bgColor.startsWith('#')) {
+            bgR = parseInt(this.bgColor.slice(1, 3), 16);
+            bgG = parseInt(this.bgColor.slice(3, 5), 16);
+            bgB = parseInt(this.bgColor.slice(5, 7), 16);
+        }
+        
+        // ピクセルごとに処理
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+            
+            // アルファ値が0の場合は既に透明
+            if (a === 0) {
+                newData[i] = 0;
+                newData[i + 1] = 0;
+                newData[i + 2] = 0;
+                newData[i + 3] = 0;
+                continue;
+            }
+            
+            // 背景色との色差を計算（より厳密な判定）
+            const colorDiff = Math.abs(r - bgR) + Math.abs(g - bgG) + Math.abs(b - bgB);
+            
+            // 色差が大きい場合は文字部分として扱う
+            if (colorDiff > 20) {
+                newData[i] = r;     // Red
+                newData[i + 1] = g; // Green
+                newData[i + 2] = b; // Blue
+                newData[i + 3] = 255; // Alpha (完全不透明)
+            } else {
+                // 背景部分は透明にする
+                newData[i] = 0;
+                newData[i + 1] = 0;
+                newData[i + 2] = 0;
+                newData[i + 3] = 0; // Alpha (完全透明)
+            }
+        }
+        
+        // 新しい画像データを描画
+        downloadCtx.putImageData(newImageData, 0, 0);
+        
+        return downloadCanvas;
     }
     
 }
