@@ -247,14 +247,53 @@ class TextPixelArt {
             });
         }
         
-        // テキスト入力時の自動生成
+        // テキスト入力時の自動生成（デバウンス付き）
         textInput.addEventListener('input', (e) => {
+            // 前のタイマーをクリア
+            if (this.inputTimeout) {
+                clearTimeout(this.inputTimeout);
+            }
+            
+            // テキストの検証と制限
+            const text = e.target.value;
+            const lines = text.split('\n');
+            
+            // 行数制限（最大5行）
+            if (lines.length > 5) {
+                const limitedText = lines.slice(0, 5).join('\n');
+                e.target.value = limitedText;
+                this.showLimitWarning('行数は最大5行までです');
+                return;
+            }
+            
+            // 各行の文字数制限（最大20文字）
+            let hasLongLine = false;
+            const limitedLines = lines.map(line => {
+                if (line.length > 20) {
+                    hasLongLine = true;
+                    return line.substring(0, 20);
+                }
+                return line;
+            });
+            
+            if (hasLongLine) {
+                e.target.value = limitedLines.join('\n');
+                this.showLimitWarning('各行は最大20文字までです');
+                return;
+            }
+            
             // テキストが空の場合はキャンバスをクリア
             if (!e.target.value.trim()) {
                 this.clearCanvas();
-            } else {
-                this.generatePixelArt();
+                return;
             }
+            
+            // 大きなグリッドサイズの場合はデバウンス時間を長くする
+            const debounceTime = this.pixelSize > 100 ? 800 : 300;
+            
+            this.inputTimeout = setTimeout(() => {
+                this.generatePixelArt();
+            }, debounceTime);
         });
         
         // Enterキーでの生成
@@ -642,6 +681,9 @@ class TextPixelArt {
         const sampleWidth = width / gridSize;
         const sampleHeight = height / gridSize;
         
+        // グリッドサイズが大きい場合はサンプリング間隔を調整
+        const skipInterval = gridSize > 150 ? 2 : 1;
+        
         for (let py = 0; py < gridSize; py++) {
             for (let px = 0; px < gridSize; px++) {
                 let blackPixels = 0;
@@ -652,8 +694,9 @@ class TextPixelArt {
                 const startY = Math.floor(py * sampleHeight);
                 const endY = Math.floor((py + 1) * sampleHeight);
                 
-                for (let y = startY; y < endY && y < height; y++) {
-                    for (let x = startX; x < endX && x < width; x++) {
+                // 大きなグリッドの場合はピクセルをスキップしてサンプリング
+                for (let y = startY; y < endY && y < height; y += skipInterval) {
+                    for (let x = startX; x < endX && x < width; x += skipInterval) {
                         const index = (y * width + x) * 4;
                         const r = data[index];
                         const g = data[index + 1];
@@ -1083,6 +1126,68 @@ class TextPixelArt {
         downloadCtx.putImageData(newImageData, 0, 0);
         
         return downloadCanvas;
+    }
+    
+    /**
+     * 制限警告を表示
+     * @param {string} message - 警告メッセージ
+     */
+    showLimitWarning(message) {
+        // 既存の警告要素があれば削除
+        const existingWarning = document.querySelector('.limit-warning');
+        if (existingWarning) {
+            existingWarning.remove();
+        }
+        
+        // 警告要素を作成
+        const warning = document.createElement('div');
+        warning.className = 'limit-warning';
+        warning.textContent = message;
+        warning.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        // CSSアニメーションを追加
+        if (!document.querySelector('#warning-styles')) {
+            const style = document.createElement('style');
+            style.id = 'warning-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(warning);
+        
+        // 3秒後に自動削除
+        setTimeout(() => {
+            if (warning.parentNode) {
+                warning.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (warning.parentNode) {
+                        warning.remove();
+                    }
+                }, 300);
+            }
+        }, 3000);
     }
     
 }
