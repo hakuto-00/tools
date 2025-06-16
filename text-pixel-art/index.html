@@ -53,7 +53,7 @@
             <div class="settings-section">
                 <div class="text-input-group">
                     <label for="text-input">変換したいテキスト:</label>
-                    <textarea id="text-input" placeholder="テキストを入力してください" rows="2" maxlength="100" autocomplete="off"></textarea>
+                    <textarea id="text-input" placeholder="テキストを入力してください（各行最大20文字、最大5行）" rows="2" maxlength="120" autocomplete="off"></textarea>
                     <!-- レスポンシブ時のみ表示される生成ボタン -->
                     <button id="generate-btn" class="mobile-only">ピクセルアート生成</button>
                 </div>
@@ -327,7 +327,7 @@
                         <div class="control-group">
                             <label for="pixel-size">グリッドサイズ:</label>
                             <div>(1-300まで指定可能)</div>
-                            <input type="number" id="pixel-size" min="1" max="300" value="50" step="1">
+                            <input type="number" id="pixel-size" min="1" max="300" value="70" step="1">
                         </div>
                     </div>
                     <div class="control-group">
