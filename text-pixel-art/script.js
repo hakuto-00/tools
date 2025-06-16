@@ -22,7 +22,7 @@ class TextPixelArt {
         this.ctx.mozImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
         
-        this.pixelSize = 50;
+        this.pixelSize = 70;
         this.textColor = '#000000';
         this.bgColor = '#ffffff';
         this.fontStyle = 'normal';
@@ -489,8 +489,8 @@ class TextPixelArt {
         
         // ピクセルサイズの検証
         if (this.pixelSize <= 0 || !isFinite(this.pixelSize)) {
-            this.pixelSize = 50;
-            document.getElementById('pixel-size').value = 50;
+            this.pixelSize = 70;
+            document.getElementById('pixel-size').value = 70;
         }
 
         // 表示制御フラグを設定
